@@ -24,4 +24,10 @@ lure.TanhExp()
 
 lure.quantile_loss(y_pred, y_target, quantile=0.5)
 lure.QuantileLoss(quantile=0.5)
+
+lure.RMSNrom(dim=256, eps=1e-6)
+
+# Noise Scheduler
+lure.LinearNoiseScheduler(beta=1e-4, beta_end=0.02, num_timesteps=1000)
+lure.CosineNoiseScheduler(max_beta=0.999, s=0.008, num_timesteps=1000):
 ```
