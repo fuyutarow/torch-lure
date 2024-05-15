@@ -6,10 +6,16 @@
 </a>
 
 
+# Depndencies
+
+```
+pip install git+https://github.com/Farama-Foundation/Minari.git@19565bd8cd33f2e4a3a9a8e4db372044b01ea8d3
+```
+
+
 ```sh
 pip install torch-lure
 ```
-
 
 # Usage
 ```py
