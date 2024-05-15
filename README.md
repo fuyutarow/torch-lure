@@ -19,7 +19,7 @@ pip install torch-lure
 
 # Usage
 ```py
-import torch_lure as lure
+import torchlure as lure
 
 # Optimizers
 lure.SophiaG(lr=1e-3, weight_decay=0.2)

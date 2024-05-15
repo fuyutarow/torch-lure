@@ -1,11 +1,15 @@
-from .minari_ext import *
 import minari
 from torch.utils.data import DataLoader, Dataset
+
+from .minari_ext import *
 
 
 class D4RLDataset(Dataset):
     def __init__(
-        self, dataset_name: str, env_id: str | None = None, n_episode: int | None = None
+        self,
+        dataset_name: str,
+        env_id: str | None = None,
+        n_episodes: int | None = None,
     ):
 
         try:
@@ -19,7 +23,7 @@ class D4RLDataset(Dataset):
             env_id is not None
         ), "env_id must be provided if dataset_name is not found"
         assert (
-            n_episode is not None
+            n_episodes is not None
         ), "n_episodes must be provided if dataset_name is not found"
 
         self.dataset_name = dataset_name

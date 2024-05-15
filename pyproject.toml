@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 
 [project]
-name = "torch-lure"
+name = "torchlure"
 dynamic = ["version"]
 description = ""
 authors = [
@@ -25,8 +25,8 @@ keywords = ["pytorch"]
 
 
 [project.urls]
-Homepage = "https://github.com/fuyutarow/torch-lure"
-Repository = "https://github.com/fuyutarow/torch-lure"
+Homepage = "https://github.com/fuyutarow/torchlure"
+Repository = "https://github.com/fuyutarow/torchlure"
 
 [tool.rye]
 managed = true
@@ -38,9 +38,11 @@ dev-dependencies = [
 
 
 [tool.setuptools_scm]
-write_to = "src/torch_lure/_version.py"
+write_to = "src/torchlure/_version.py"
 version_scheme = "post-release"
 local_scheme = "dirty-tag"
 
+
 [tool.setuptools.packages.find]
-include = ["src/torch_lure", "src/torch_lure.*"]
+where = ["src"]
+include = ["torchlure", "torchlure.*"]

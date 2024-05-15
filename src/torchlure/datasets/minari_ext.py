@@ -316,7 +316,7 @@ async def collect_episode(env, i, policy=None):
         action = env.action_space.sample() if policy is None else policy()
         obs, rew, terminated, truncated, info = env.step(action)
         done = terminated or truncated
-    if i % 100 == 0:
+    if i % 1000 == 0:
         print(f"Collected {i} episodes")
 
 

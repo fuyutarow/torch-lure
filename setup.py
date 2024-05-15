@@ -10,7 +10,7 @@ CWD = pathlib.Path(__file__).absolute().parent
 
 def get_version():
     """Gets the version."""
-    path = CWD / "src" / "torch_lure" / "__init__.py"
+    path = CWD / "src" / "torchlure" / "__init__.py"
     content = path.read_text()
 
     for line in content.splitlines():
