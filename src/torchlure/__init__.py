@@ -5,4 +5,4 @@ from .noise_schedulers import *
 from .optim import *
 from .utils import *
 
-__version__ = "0.2405.3"
+__version__ = "0.2405.9"

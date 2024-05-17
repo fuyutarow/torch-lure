@@ -40,24 +40,23 @@ lure.CosineNoiseScheduler(max_beta=0.999, s=0.008, num_timesteps=1000):
 
 ### Dataset
 
+
+
 ```py
 from torchlure.datasets import OfflineRLDataset, D4RLDataset
 
+# Initial usage with download
+# %%
 dataset = D4RLDataset(
-    dataset_id="hopper-exppert-2405.1",
-    dataset_name="d4rl_hopper-expert-v2",
-    env_id="Hopper-v4",
+    dataset_id= "hopper-medium-expert-v2.2405",
+    d4rl_name= "hopper-medium-expert-v2",
+    env_id= "Hopper-v4",
 )
 
+# if you are download it once
 dataset = D4RLDataset(
-    dataset_id="d4rl_halfcheetah-expert-2405",
-    dataset_name="d4rl_halfcheetah-expert-v2",
-    env_id= "HalfCheetah-v4",
-)
-
-ataset = D4RLDataset(
-    dataset_id="d4rl_walker2d-expert-2405",
-    dataset_name="d4rl_walker2d-expert-v2",
-    env_id= "Walker2d-v4",
+    dataset_id= "hopper-medium-expert-v2.2405",
 )
 ```
+
+See all datasets [here](https://github.com/pytorch/rl/blob/3a7cf6af2a08089f11e0ed8cad3dd1cea0e253fb/torchrl/data/datasets/d4rl_infos.py)
