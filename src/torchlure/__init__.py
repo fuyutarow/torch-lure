@@ -1,8 +1,8 @@
-from .functional import *
-from .utils import *
-from .optim import *
-from .noise_schedulers import *
-from .modules import *
 from .datasets import *
+from .functional import *
+from .modules import *
+from .noise_schedulers import *
+from .optim import *
+from .utils import *
 
-__version__ = "0.2405.1"
+__version__ = "0.2405.3-dev"

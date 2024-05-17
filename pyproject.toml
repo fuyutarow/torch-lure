@@ -18,6 +18,7 @@ dependencies = [
     # "minari @ git+https://github.com/Farama-Foundation/Minari@19565bd8cd33f2e4a3a9a8e4db372044b01ea8d3",
     "gymnasium>=0.29.1",
     "jax>=0.4.28",
+    "gdown>=5.2.0",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
