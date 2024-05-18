@@ -5,11 +5,12 @@ import gymnasium as gym
 import h5py
 import minari
 import requests
+import torch
 from minari.data_collector.episode_buffer import EpisodeBuffer
 from minari.utils import create_dataset_from_buffers
 from torch.utils.data import Dataset
 
-from .d4rl_infos import D4RL_DATASETS
+from .d4rl_infos import DATASETS_URLS, REF_MAX_SCORE, REF_MIN_SCORE
 
 
 class D4RLDataset(Dataset):
@@ -18,13 +19,36 @@ class D4RLDataset(Dataset):
         dataset_id: str,
         d4rl_name: Union[str, None] = None,
         env_id: Union[str, None] = None,
-        hdf5_url: Union[str, None] = None,
+        normalize_score: bool = True,
     ):
         self.dataset_id = dataset_id
         self.d4rl_name = d4rl_name
         self.env_id = env_id
-        self.hdf5_url = hdf5_url
+        self.normalize_score = normalize_score
+
+        assert d4rl_name in DATASETS_URLS, f"Unknown d4rl_name: {d4rl_name}"
+        self.hdf5_url = DATASETS_URLS[d4rl_name]
+
+        if self.normalize_score:
+            self.random_score = self.get_score_with_fallback(REF_MIN_SCORE, d4rl_name)
+            self.expert_score = self.get_score_with_fallback(REF_MAX_SCORE, d4rl_name)
+        else:
+            self.random_score = None
+            self.expert_score = None
+
         self.dataset = self.load_or_create_dataset()
+
+    def get_score_with_fallback(self, score_dict, d4rl_name):
+        if d4rl_name in score_dict:
+            return score_dict[d4rl_name]
+        else:
+            # Attempt fallbacks
+            fallback_versions = ["-v1", "-v0"]
+            for version in fallback_versions:
+                fallback_key = d4rl_name.rsplit("-", 1)[0] + version
+                if fallback_key in score_dict:
+                    return score_dict[fallback_key]
+            raise KeyError(f"No available score for {d4rl_name} and fallbacks")
 
     def load_or_create_dataset(self) -> minari.MinariDataset:
         """Load an existing dataset or create a new one if not found."""
@@ -45,6 +69,10 @@ class D4RLDataset(Dataset):
         env = gym.make(self.env_id)
         episodes = self.collect_all_episodes_from_hdf5()
         self.initialize_episode_fields(episodes)
+
+        if self.normalize_score:
+            self.normalize_rewards(episodes)  # Normalize rewards here
+
         episode_buffer_list = self.create_episode_buffer_list(episodes)
         self.create_minari_dataset(episode_buffer_list, env)
 
@@ -145,6 +173,22 @@ class D4RLDataset(Dataset):
             ep.setdefault("truncations", [])
             ep["infos"] = ep.get("infos") or {}
             ep.setdefault("next_observations", [])
+
+    def normalize_rewards(self, episodes: List[Dict[str, Any]]):
+        assert self.random_score is not None, "Random score must be provided."
+        assert self.expert_score is not None, "Expert score must be provided."
+
+        """Normalize the rewards in each episode using vectorization."""
+        for episode in episodes:
+            rewards = torch.tensor(episode["rewards"])
+            n_steps = len(rewards)
+            rewards = (
+                100
+                * (rewards - self.random_score / n_steps)
+                / (self.expert_score - self.random_score)
+            )
+            episode["rewards"] = rewards
+        print("Normalized rewards for all episodes.")
 
     @staticmethod
     def create_episode_buffer_list(
