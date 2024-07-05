@@ -43,24 +43,36 @@ lure.CosineNoiseScheduler(max_beta=0.999, s=0.008, num_timesteps=1000):
 
 
 ```py
+import gymnasium as gym
+import numpy as np
 from torchlure.datasets import MinariEpisodeDataset, MinariTrajectoryDataset
 
-env = gym.make("Hopper-V4")
-minari_dataset = MinariEpisodeDataset("2048.2407.2")
+env = gym.make("Hopper-v4")
+minari_dataset = MinariEpisodeDataset("Hopper-v4.2407")
 minari_dataset.create(env, n_episodes=100)
 minari_dataset.info()
+# Observation space: Box(-inf, inf, (11,), float64)
+# Action space: Box(-1.0, 1.0, (3,), float32)
+# Total episodes: 100
+# Total steps: 2,182
 
 traj_dataset = MinariTrajectoryDataset(minari_dataset, traj_len=20)
 
 ep = traj_dataset[2]
-ep["observations"].shape, ep["actions"].shape, ep["rewards"].shape, ep[
-    "terminations"
-].shape, ep["truncate"].shape
-
 ep = traj_dataset[[3, 8, 15]]
 ep = traj_dataset[np.arange(16)]
 ep = traj_dataset[torch.arange(16)]
 ep = traj_dataset[-16:]
+
+ep["observations"].shape, ep["actions"].shape, ep["rewards"].shape, ep[
+    "terminations"
+].shape, ep["truncate"].shape
+# (torch.Size([16, 20, 4, 4, 16]),
+#  torch.Size([16, 20]),
+#  torch.Size([16, 20]),
+#  torch.Size([16, 20]),
+#  torch.Size([16, 20]))
+
 
 ```
 
