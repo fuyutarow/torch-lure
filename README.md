@@ -6,13 +6,14 @@
 </a>
 
 
-# Depndencies
-
+<!-- # Depndencies -->
+<!-- 
 ```
 pip install git+https://github.com/Farama-Foundation/Minari.git@19565bd8cd33f2e4a3a9a8e4db372044b01ea8d3
-```
+``` -->
 
 
+# Installations
 ```sh
 pip install torchlure
 ```
@@ -45,11 +46,12 @@ lure.CosineNoiseScheduler(max_beta=0.999, s=0.008, num_timesteps=1000):
 ```py
 import gymnasium as gym
 import numpy as np
+import torch
 from torchlure.datasets import MinariEpisodeDataset, MinariTrajectoryDataset
 
 env = gym.make("Hopper-v4")
 minari_dataset = MinariEpisodeDataset("Hopper-v4.2407")
-minari_dataset.create(env, n_episodes=100)
+minari_dataset.create(env, n_episodes=100, exist_ok=True)
 minari_dataset.info()
 # Observation space: Box(-inf, inf, (11,), float64)
 # Action space: Box(-1.0, 1.0, (3,), float32)
@@ -58,16 +60,16 @@ minari_dataset.info()
 
 traj_dataset = MinariTrajectoryDataset(minari_dataset, traj_len=20)
 
-ep = traj_dataset[2]
-ep = traj_dataset[[3, 8, 15]]
-ep = traj_dataset[np.arange(16)]
-ep = traj_dataset[torch.arange(16)]
-ep = traj_dataset[-16:]
-
-ep["observations"].shape, ep["actions"].shape, ep["rewards"].shape, ep[
-    "terminations"
-].shape, ep["truncate"].shape
+traj = traj_dataset[2]
+traj = traj_dataset[[3, 8, 15]]
+traj = traj_dataset[np.arange(16)]
+traj = traj_dataset[torch.arange(16)]
+traj = traj_dataset[-16:]
+traj["observations"].shape, traj["actions"].shape, traj["rewards"].shape, traj[
+    "terminated"
+].shape, traj["truncated"].shape, traj["timesteps"].shape
 # (torch.Size([16, 20, 4, 4, 16]),
+#  torch.Size([16, 20]),
 #  torch.Size([16, 20]),
 #  torch.Size([16, 20]),
 #  torch.Size([16, 20]),

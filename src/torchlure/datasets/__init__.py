@@ -19,13 +19,23 @@ class MinariEpisodeDataset(Dataset):
         except:
             self.dataset = None
 
-    def create(self, env, n_episodes: int):
-        assert self.dataset is None, "Dataset already exists"
+    def exists(self):
+        return self.dataset is not None
 
+    def create(self, env, n_episodes: int, exist_ok=False):
+        match (self.exists(), exist_ok):
+            case (True, True):
+                pass
+            case (True, False):
+                raise ValueError(f"Dataset '{self.dataset_name}' already exists.")
+            case (False, _):
+                self._create(env, n_episodes)
+
+    def _create(self, env, n_episodes: int):
         if not isinstance(env, minari.DataCollector):
             env = minari.DataCollector(env)
 
-        for _ in tqdm(range(n_episodes), total=n_episodes, desc="Collecting data"):
+        for _ in tqdm(range(n_episodes), total=n_episodes, desc="Collecting episodes"):
             env.reset()
             done = False
             while not done:
@@ -100,15 +110,22 @@ class MinariTrajectoryDataset(Dataset):
         actions = ep.actions[start_idx:end_idx]
         rewards = ep.rewards[start_idx:end_idx]
         terminations = ep.terminations[start_idx:end_idx]
-        truncate = ep.truncations[start_idx:end_idx]
+        truncations = ep.truncations[start_idx:end_idx]
+        timesteps = torch.arange(start_idx, end_idx)
 
         return TensorDict(
             {
                 "observations": torch.tensor(observations),
                 "actions": torch.tensor(actions),
                 "rewards": torch.tensor(rewards),
-                "terminations": torch.tensor(terminations),
-                "truncate": torch.tensor(truncate),
+                "terminated": torch.tensor(terminations),
+                "truncateted": torch.tensor(truncations),
+                "timesteps": timesteps,
             },
             batch_size=[],
         )
+
+    def sample(self, n: int) -> TensorDict:
+        # index = torch.randperm(len(self))[:n]
+        index = torch.randint(0, len(self), (n,))
+        return self[index]
