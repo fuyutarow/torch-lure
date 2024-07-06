@@ -85,12 +85,12 @@ class MinariTrajectoryDataset(Dataset):
     def __len__(self) -> int:
         return len(self.book)
 
-    def __getitem__(self, index: int | list[int]) -> TensorDict:
+    def __getitem__(self, index: int | list[int]) -> dict:
         match index:
             case int():
-                return self._get_by_idx(index)
+                return self._get_by_idx(index).to_dict()
             case list():
-                return torch.cat([self[i].unsqueeze(0) for i in index], dim=0)
+                return torch.stack([self._get_by_idx(i) for i in index]).to_dict()
             case slice():
                 index = list(range(*index.indices(len(self))))
                 return self[index]
