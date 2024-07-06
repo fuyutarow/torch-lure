@@ -48,9 +48,25 @@ import gymnasium as gym
 import numpy as np
 import torch
 from torchlure.datasets import MinariEpisodeDataset, MinariTrajectoryDataset
+from torchtyping import TensorType
+
+def return_to_go(rewards: TensorType[..., "T"], gamma: float) -> TensorType[..., "T"]:
+    if gamma == 1.0:
+        return rewards.flip(-1).cumsum(-1).flip(-1)
+
+    seq_len = rewards.shape[-1]
+    rtgs = torch.zeros_like(rewards)
+    rtg = torch.zeros_like(rewards[..., 0])
+
+    for i in range(seq_len - 1, -1, -1):
+        rtg = rewards[..., i] + gamma * rtg
+        rtgs[..., i] = rtg
+
+    return rtgs
+
 
 env = gym.make("Hopper-v4")
-minari_dataset = MinariEpisodeDataset("Hopper-v4.2407")
+minari_dataset = MinariEpisodeDataset("Hopper-random-v0")
 minari_dataset.create(env, n_episodes=100, exist_ok=True)
 minari_dataset.info()
 # Observation space: Box(-inf, inf, (11,), float64)
@@ -58,7 +74,9 @@ minari_dataset.info()
 # Total episodes: 100
 # Total steps: 2,182
 
-traj_dataset = MinariTrajectoryDataset(minari_dataset, traj_len=20)
+traj_dataset = MinariTrajectoryDataset(minari_dataset, traj_len=20, {
+    "returns": lambda ep: return_to_go(torch.tensor(ep.rewards), 0.99),
+})
 
 traj = traj_dataset[2]
 traj = traj_dataset[[3, 8, 15]]

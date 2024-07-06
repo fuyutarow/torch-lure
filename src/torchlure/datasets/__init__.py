@@ -1,3 +1,5 @@
+from typing import Callable
+
 import gymnasium as gym
 import minari
 import numpy as np
@@ -62,10 +64,39 @@ class MinariEpisodeDataset(Dataset):
 
 
 class MinariTrajectoryDataset(Dataset):
-    def __init__(self, minari_dataset: MinariEpisodeDataset, traj_len: int):
+    def __init__(
+        self,
+        minari_dataset: MinariEpisodeDataset,
+        traj_len: int,
+        custom_info: dict[str, Callable[[minari.EpisodeData], torch.Tensor]] = {},
+    ):
         self.minari_dataset = minari_dataset
         self.traj_len = traj_len
         self.book = self.build_book(self.minari_dataset, self.traj_len)
+        self.info = self.build_info(custom_info)
+
+    def build_info(
+        self, custom_info: dict[str, Callable[[minari.EpisodeData], torch.Tensor]]
+    ) -> dict[str, dict[str, torch.Tensor]]:
+        info: dict[str, dict[str, torch.Tensor]] = {
+            "observations": {},
+            "actions": {},
+            "rewards": {},
+            "terminated": {},
+            "truncated": {},
+            "timesteps": {},
+            **{key: {} for key in custom_info},
+        }
+        for ep in self.minari_dataset:
+            info["observations"][ep.id] = torch.tensor(ep.observations)
+            info["actions"][ep.id] = torch.tensor(ep.actions)
+            info["rewards"][ep.id] = torch.tensor(ep.rewards)
+            info["terminated"][ep.id] = torch.tensor(ep.terminations)
+            info["truncated"][ep.id] = torch.tensor(ep.truncations)
+            info["timesteps"][ep.id] = torch.arange(ep.total_timesteps)
+            for key, func in custom_info.items():
+                info[key][ep.id] = func(ep)
+        return info
 
     @staticmethod
     def build_book(minari_dataset: MinariEpisodeDataset, traj_len: int):
@@ -105,22 +136,11 @@ class MinariTrajectoryDataset(Dataset):
 
     def _get_by_idx(self, index: int) -> TensorDict:
         ep_id, start_idx, end_idx = self.book[index]
-        ep = self.minari_dataset[ep_id]
-        observations = ep.observations[start_idx:end_idx]
-        actions = ep.actions[start_idx:end_idx]
-        rewards = ep.rewards[start_idx:end_idx]
-        terminations = ep.terminations[start_idx:end_idx]
-        truncations = ep.truncations[start_idx:end_idx]
-        timesteps = torch.arange(start_idx, end_idx)
 
         return TensorDict(
             {
-                "observations": torch.tensor(observations),
-                "actions": torch.tensor(actions),
-                "rewards": torch.tensor(rewards),
-                "terminated": torch.tensor(terminations),
-                "truncated": torch.tensor(truncations),
-                "timesteps": timesteps,
+                key: torch.tensor(self.info[key][ep_id][start_idx:end_idx])
+                for key in self.info.keys()
             },
             batch_size=[],
         )
