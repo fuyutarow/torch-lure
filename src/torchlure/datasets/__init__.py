@@ -119,7 +119,7 @@ class MinariTrajectoryDataset(Dataset):
                 "actions": torch.tensor(actions),
                 "rewards": torch.tensor(rewards),
                 "terminated": torch.tensor(terminations),
-                "truncateted": torch.tensor(truncations),
+                "truncated": torch.tensor(truncations),
                 "timesteps": timesteps,
             },
             batch_size=[],
