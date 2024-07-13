@@ -1,9 +1,14 @@
 {
   "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-      "source.organizeImports": "always",
-    },
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
   },
+  "ruff.organizeImports": false,
+  "ruff.format.args": [
+    "--config=pyproject.toml"
+  ],
 }
