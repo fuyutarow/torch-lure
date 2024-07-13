@@ -13,12 +13,45 @@ pip install git+https://github.com/Farama-Foundation/Minari.git@19565bd8cd33f2e4
 ``` -->
 
 
-# Installations
+## Installations
 ```sh
 pip install torchlure
 ```
 
-# Usage
+## Usage
+```py
+import torchlure as lure
+
+# Optimizers
+lure.SophiaG(lr=1e-3, weight_decay=0.2)
+
+# Functions
+lure.tanh_exp(x)
+lure.TanhExp()
+
+lure.quantile_loss(y_pred, y_target, quantile=0.5)
+lure.QuantileLoss(quantile=0.5)
+
+lure.RMSNrom(dim=256, eps=1e-6)
+
+# Noise Scheduler
+lure.LinearNoiseScheduler(beta=1e-4, beta_end=0.02, num_timesteps=1000)
+lure.CosineNoiseScheduler(max_beta=0.999, s=0.008, num_timesteps=1000):
+
+
+lure.ReLUKAN(width=[11, 16, 16, 2], grid=5, k=3)
+
+lure.create_relukan_network(
+    input_dim=11,
+    output_dim=2,
+    hidden_dim=32,
+    num_layers=3,
+    grid=5,
+    k=3,
+)
+
+```
+
 ```py
 import torchlure as lure
 

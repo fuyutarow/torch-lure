@@ -9,7 +9,6 @@ from torch.utils.data import Dataset
 from tqdm import tqdm
 
 
-# %%
 class MinariEpisodeDataset(Dataset):
     def __init__(self, dataset_name: str):
         self.dataset_name = dataset_name
@@ -21,27 +20,25 @@ class MinariEpisodeDataset(Dataset):
         except:
             self.dataset = None
 
-    def exists(self):
-        return self.dataset is not None
+    def create(
+        self,
+        env,
+        n_samples: int,
+        policy: Callable[[np.ndarray], np.ndarray] | None = None,
+    ):
+        assert self.dataset is None, "Dataset already exists"
 
-    def create(self, env, n_episodes: int, exist_ok=False):
-        match (self.exists(), exist_ok):
-            case (True, True):
-                pass
-            case (True, False):
-                raise ValueError(f"Dataset '{self.dataset_name}' already exists.")
-            case (False, _):
-                self._create(env, n_episodes)
-
-    def _create(self, env, n_episodes: int):
         if not isinstance(env, minari.DataCollector):
             env = minari.DataCollector(env)
 
-        for _ in tqdm(range(n_episodes), total=n_episodes, desc="Collecting episodes"):
-            env.reset()
+        for _ in tqdm(range(n_samples), total=n_samples, desc="Collecting data"):
+            obs, info = env.reset()
             done = False
             while not done:
-                action = env.action_space.sample()  # <- use your policy here
+                if policy is not None:
+                    action = policy(obs)
+                else:
+                    action = env.action_space.sample()  # <- use your policy here
                 obs, rew, terminated, truncated, info = env.step(action)
                 done = terminated or truncated
         dataset = env.create_dataset(self.dataset_name)
