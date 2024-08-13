@@ -17,10 +17,7 @@ class RandomSampler(Sampler):
         indices = np.arange(len(self.dataset))
         np.random.shuffle(indices)
 
-        batches = [
-            indices[i : i + self.batch_size]
-            for i in range(0, len(indices), self.batch_size)
-        ]
+        batches = [indices[i : i + self.batch_size] for i in range(0, len(indices), self.batch_size)]
         batches = batches[: self.max_steps]
 
         if not self.drop_last:
@@ -39,7 +36,7 @@ class RandomSampler(Sampler):
             return self.max_steps
 
 
-def random_dataloader(dataset: Dataset, max_steps: int, batch_size: int):
+def random_dataloader(dataset: Dataset, max_steps: int, batch_size: int, **kwargs):
     sampler = RandomSampler(dataset, max_steps=max_steps, batch_size=batch_size)
-    dataloader = DataLoader(dataset, batch_size=None, sampler=sampler)
+    dataloader = DataLoader(dataset, batch_size=None, sampler=sampler, **kwargs)
     return dataloader

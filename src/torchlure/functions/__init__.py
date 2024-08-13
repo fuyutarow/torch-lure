@@ -2,7 +2,7 @@ from collections.abc import Callable
 from typing import Literal
 
 import einops as ein
-import jaxtorch as jt
+import jaxtyping as jt
 import torch as th
 from torchtyping import TensorType
 
