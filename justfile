@@ -1,4 +1,6 @@
 
+sync:
+    uv sync
 
 clean:
     rm -rf dist

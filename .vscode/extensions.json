@@ -1,20 +1,19 @@
 {
   "recommendations": [
-    "ms-python.vscode-pylance",
-    "ms-python.black-formatter",
     "ms-python.python",
     "ms-toolsai.jupyter",
-    "ms-python.isort",
     "ms-python.debugpy",
-    "ms-python.pylint",
-    "ms-python.mypy-type-checker",
     "ms-python.gather",
-    "ms-toolsai.vscode-jupyter-slideshow",
     "ms-toolsai.jupyter-renderers",
     "ms-toolsai.vscode-jupyter-cell-tags",
-    "ms-toolsai.vscode-jupyter-powertoys",
-    "ms-toolsai.datawrangler",
+    "ms-toolsai.vscode-jupyter-slideshow",
     "mechatroner.rainbow-csv",
     "charliermarsh.ruff"
+    // USE RUFF, NOT the following
+    // "ms-python.vscode-pylance",
+    // "ms-python.black-formatter",
+    // "ms-python.pylint",
+    // "ms-python.mypy-type-checker",
+    // "ms-python.isort",
   ]
 }
