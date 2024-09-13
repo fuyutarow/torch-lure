@@ -1,3 +1,4 @@
+import math
 from collections.abc import Callable
 from typing import Literal
 
@@ -102,14 +103,17 @@ def skew(x, dim=None, unbiased=False):
     x_diff_sq = x_diff**2
     x_diff_cube = x_diff**3
     n = x.shape[dim] if dim is not None else x.numel()
+
     m2 = th.mean(x_diff_sq, dim=dim)
     m3 = th.mean(x_diff_cube, dim=dim)
-    if unbiased:
-        correction = th.sqrt((n * (n - 1)).to(th.float32)) / (n - 2)
+
+    if unbiased and n > 2:
+        correction = (n * (n - 1)) ** 0.5 / (n - 2)
     else:
         correction = 1.0
-    skew = correction * m3 / (m2**1.5 + 1e-8)
-    return skew
+
+    skewness = correction * m3 / (m2**1.5 + 1e-8)
+    return skewness
 
 
 def kurtosis(x, dim=None, unbiased=False):
@@ -118,11 +122,14 @@ def kurtosis(x, dim=None, unbiased=False):
     x_diff_sq = x_diff**2
     x_diff_fourth = x_diff_sq**2
     n = x.shape[dim] if dim is not None else x.numel()
+
     m2 = th.mean(x_diff_sq, dim=dim)
     m4 = th.mean(x_diff_fourth, dim=dim)
-    if unbiased:
-        correction = (n - 1) * ((n + 1) * (n - 1)) / ((n - 2) * (n - 3))
+
+    if unbiased and n > 3:
+        correction = (n * (n + 1)) / ((n - 1) * (n - 2) * (n - 3)) * ((n - 1) ** 2)
     else:
         correction = 1.0
-    kurtosis = correction * m4 / (m2**2 + 1e-8) - 3
-    return kurtosis
+
+    kurt = correction * m4 / (m2**2 + 1e-8) - 3
+    return kurt
