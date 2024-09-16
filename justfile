@@ -2,6 +2,9 @@
 sync:
     uv sync
 
+up:
+    uv sync --upgrade
+
 clean:
     rm -rf dist
 

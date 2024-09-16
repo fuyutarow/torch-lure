@@ -1,3 +1,7 @@
+import gc
+from collections.abc import Callable
+from functools import wraps
+
 import numpy as np
 import torch
 from torch.utils.data import DataLoader, Dataset, Sampler
@@ -32,11 +36,24 @@ class RandomSampler(Sampler):
     def __len__(self):
         if self.drop_last:
             return min(len(self.dataset) // self.batch_size, self.max_steps)
-        else:
-            return self.max_steps
+        return self.max_steps
 
 
 def random_dataloader(dataset: Dataset, max_steps: int, batch_size: int, **kwargs):
     sampler = RandomSampler(dataset, max_steps=max_steps, batch_size=batch_size)
     dataloader = DataLoader(dataset, batch_size=None, sampler=sampler, **kwargs)
     return dataloader
+
+
+def cuda_memory_auto_release(func: Callable) -> Callable:
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        finally:
+            gc.collect()
+            torch.cuda.empty_cache()
+            if torch.cuda.is_available():
+                torch.cuda.synchronize()
+
+    return wrapper

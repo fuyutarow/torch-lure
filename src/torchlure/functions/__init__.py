@@ -97,39 +97,61 @@ def rolling_apply(
     return path
 
 
-def skew(x, dim=None, unbiased=False):
+def skew(x, dim=None, unbiased=True, keepdim=False):
     x_mean = x.mean(dim=dim, keepdim=True)
     x_diff = x - x_mean
-    x_diff_sq = x_diff**2
-    x_diff_cube = x_diff**3
-    n = x.shape[dim] if dim is not None else x.numel()
+    m2 = th.mean(x_diff**2, dim=dim, keepdim=keepdim)
+    m3 = th.mean(x_diff**3, dim=dim, keepdim=keepdim)
 
-    m2 = th.mean(x_diff_sq, dim=dim)
-    m3 = th.mean(x_diff_cube, dim=dim)
+    eps = th.finfo(x.dtype).eps
+    zero_variance = m2 <= (eps * x_mean.squeeze(dim)) ** 2
 
-    if unbiased and n > 2:
-        correction = (n * (n - 1)) ** 0.5 / (n - 2)
+    with th.no_grad():
+        g1 = m3 / (m2**1.5)
+        g1 = th.where(zero_variance, th.full_like(g1, float("nan")), g1)
+
+    if unbiased:
+        n = x.size(dim) if dim is not None else x.numel()
+        if n > 2:
+            correction = ((n - 1) * n) ** 0.5 / (n - 2)
+            skewness = correction * g1
+        else:
+            skewness = g1
     else:
-        correction = 1.0
+        skewness = g1
 
-    skewness = correction * m3 / (m2**1.5 + 1e-8)
     return skewness
 
 
-def kurtosis(x, dim=None, unbiased=False):
+def kurtosis(x, dim=None, unbiased=True, fisher=True, keepdim=False):
     x_mean = x.mean(dim=dim, keepdim=True)
     x_diff = x - x_mean
-    x_diff_sq = x_diff**2
-    x_diff_fourth = x_diff_sq**2
-    n = x.shape[dim] if dim is not None else x.numel()
+    m2 = th.mean(x_diff**2, dim=dim, keepdim=keepdim)
+    m4 = th.mean(x_diff**4, dim=dim, keepdim=keepdim)
 
-    m2 = th.mean(x_diff_sq, dim=dim)
-    m4 = th.mean(x_diff_fourth, dim=dim)
+    eps = th.finfo(x.dtype).eps
+    zero_variance = m2 <= (eps * x_mean.squeeze(dim)) ** 2
 
-    if unbiased and n > 3:
-        correction = (n * (n + 1)) / ((n - 1) * (n - 2) * (n - 3)) * ((n - 1) ** 2)
+    with th.no_grad():
+        g2 = m4 / (m2**2)
+        g2 = th.where(zero_variance, th.full_like(g2, float("nan")), g2)
+
+    if unbiased:
+        n = x.size(dim) if dim is not None else x.numel()
+        if n > 3:
+            numerator = n * (n + 1)
+            denominator = (n - 1) * (n - 2) * (n - 3)
+            correction = numerator / denominator
+            term2 = 3 * (n - 1) ** 2 / ((n - 2) * (n - 3))
+            adjusted_g2 = correction * g2 - term2
+        else:
+            adjusted_g2 = g2
     else:
-        correction = 1.0
+        adjusted_g2 = g2
 
-    kurt = correction * m4 / (m2**2 + 1e-8) - 3
+    if fisher:
+        kurt = adjusted_g2 - 3
+    else:
+        kurt = adjusted_g2
+
     return kurt
