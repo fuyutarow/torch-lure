@@ -104,7 +104,13 @@ def skew(x, dim=None, unbiased=True, keepdim=False):
     m3 = th.mean(x_diff**3, dim=dim, keepdim=keepdim)
 
     eps = th.finfo(x.dtype).eps
-    zero_variance = m2 <= (eps * x_mean.squeeze(dim)) ** 2
+
+    if dim is not None:
+        mean_reduced = x_mean.squeeze(dim)
+    else:
+        mean_reduced = x_mean.squeeze()
+
+    zero_variance = m2 <= (eps * mean_reduced) ** 2
 
     with th.no_grad():
         g1 = m3 / (m2**1.5)
@@ -130,7 +136,13 @@ def kurtosis(x, dim=None, unbiased=True, fisher=True, keepdim=False):
     m4 = th.mean(x_diff**4, dim=dim, keepdim=keepdim)
 
     eps = th.finfo(x.dtype).eps
-    zero_variance = m2 <= (eps * x_mean.squeeze(dim)) ** 2
+
+    if dim is not None:
+        mean_reduced = x_mean.squeeze(dim)
+    else:
+        mean_reduced = x_mean.squeeze()
+
+    zero_variance = m2 <= (eps * mean_reduced) ** 2
 
     with th.no_grad():
         g2 = m4 / (m2**2)
