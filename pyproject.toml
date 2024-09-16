@@ -32,6 +32,8 @@ dev-dependencies = [
   "pip",
   "wheel",
   "setuptools",
+  "pytest>=8.3.3",
+  "scipy>=1.10.1",
 ]
 
 [project.optional-dependencies]

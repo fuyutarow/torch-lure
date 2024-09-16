@@ -5,6 +5,9 @@ sync:
 up:
     uv sync --upgrade
 
+test:
+    uv run pytest ./tests
+
 clean:
     rm -rf dist
 

@@ -104,7 +104,6 @@ def skew(x, dim=None, unbiased=True, keepdim=False):
     m3 = th.mean(x_diff**3, dim=dim, keepdim=keepdim)
 
     eps = th.finfo(x.dtype).eps
-
     if dim is not None:
         mean_reduced = x_mean.squeeze(dim)
     else:
@@ -119,7 +118,7 @@ def skew(x, dim=None, unbiased=True, keepdim=False):
     if unbiased:
         n = x.size(dim) if dim is not None else x.numel()
         if n > 2:
-            correction = ((n - 1) * n) ** 0.5 / (n - 2)
+            correction = ((n * (n - 1)) ** 0.5) / (n - 2)
             skewness = correction * g1
         else:
             skewness = g1
@@ -151,18 +150,18 @@ def kurtosis(x, dim=None, unbiased=True, fisher=True, keepdim=False):
     if unbiased:
         n = x.size(dim) if dim is not None else x.numel()
         if n > 3:
-            numerator = n * (n + 1)
-            denominator = (n - 1) * (n - 2) * (n - 3)
+            numerator = n**2 - 1
+            denominator = (n - 2) * (n - 3)
             correction = numerator / denominator
-            term2 = 3 * (n - 1) ** 2 / ((n - 2) * (n - 3))
-            adjusted_g2 = correction * g2 - term2
+            term2 = 3 * (n - 1) ** 2 / denominator
+            adjusted_g2 = correction * g2 - term2 + 3  # "+3" を追加
         else:
             adjusted_g2 = g2
     else:
         adjusted_g2 = g2
 
     if fisher:
-        kurt = adjusted_g2 - 3
+        kurt = adjusted_g2 - 3  # フィッシャーの定義では3を引く
     else:
         kurt = adjusted_g2
 
