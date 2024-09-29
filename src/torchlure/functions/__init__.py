@@ -166,3 +166,19 @@ def kurtosis(x, dim=None, unbiased=True, fisher=True, keepdim=False):
         kurt = adjusted_g2
 
     return kurt
+
+
+def iqm(
+    x: jt.Num[th.Tensor, "... N"],
+    q1: float = 0.25,
+    q3: float = 0.75,
+    keepdim: bool = False,
+) -> jt.Num[th.Tensor, "..."]:
+    """Calculate the Interquartile Mean (IQM)"""
+    q1_val = th.nanquantile(x, q1, dim=-1, keepdim=True)
+    q3_val = th.nanquantile(x, q3, dim=-1, keepdim=True)
+
+    mask = (x >= q1_val) & (x <= q3_val)
+    iqm_value = th.nanmean(th.where(mask, x, th.nan), dim=-1, keepdim=keepdim)
+
+    return iqm_value
